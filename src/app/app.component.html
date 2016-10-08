@@ -1,9 +1,21 @@
-<h1>
-  {{title}}!!!22
-</h1>
-
 <div class="navbar-header">
-  <a class="navbar-brand" href="#">Auth0 - Angular 2</a>
   <button class="btn btn-primary btn-margin" (click)="auth.login()" *ngIf="!auth.authenticated()">Log In</button>
   <button class="btn btn-primary btn-margin" (click)="auth.logout()" *ngIf="auth.authenticated()">Log Out</button>
 </div>
+
+<input type="text" #newmessage style="margin-top: 30px;" (keyup)="onMessageInputKeyUp($event.keyCode, newmessage.value)"/>
+<button (click)="addMessage(newmessage.value)">Add guest message</button>
+
+<ul style="margin-top: 30px;">
+  <li *ngFor="let message of guestMessages | async">
+    {{ message.content }}
+  </li>
+</ul>
+
+
+
+
+
+
+
+
