@@ -1,0 +1,27 @@
+@import "../../node_modules/gridle/sass/gridle/gridle-flex";
+
+@include gridle_setup( (
+  context : 12,
+  gutter-width : 20px,
+  direction : ltr,
+) );
+
+@include gridle_register_state( xs, (
+  max-width : 768px
+) );
+@include gridle_register_state( sm , (
+  min-width : 768px
+) );
+@include gridle_register_state( md, (
+  min-width : 992px
+) );
+@include gridle_register_state( lg, (
+  min-width : 1200px
+) );
+
+@include gridle_generate_classes();
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}

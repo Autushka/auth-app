@@ -1,6 +1,6 @@
-import { browser, element, by } from 'protractor/globals';
+import { browser, element, by } from 'protractor';
 
-export class AuthAppPage {
+export class AuthApp3Page {
   navigateTo() {
     return browser.get('/');
   }

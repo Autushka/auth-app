@@ -1,28 +1,31 @@
-import {Component} from '@angular/core';
-import {Auth} from './auth.service';
-import {AngularFire, FirebaseListObservable} from 'angularfire2';
+import {Component, ApplicationRef} from '@angular/core';
+import {AngularFire, FirebaseListObservable, FirebaseObjectObservable} from 'angularfire2';
+import {Router, ActivatedRoute} from "@angular/router";
+import {Observable} from "rxjs";
+import {SharedDataService} from "./shared-data.service";
+import {AuthGuardService} from "./auth-guard.service";
 
 @Component({
-  selector: 'app-root',
-  providers: [Auth],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.sass']
+	selector: 'app-root',
+	templateUrl: './app.component.html',
+	styleUrls: ['./app.component.scss']
 })
+
 export class AppComponent {
-  title = 'guest book';
-  guestMessages: FirebaseListObservable<any>;
+	title: string;
+	af: AngularFire;
 
-  constructor(private auth: Auth, af: AngularFire) {
-    this.guestMessages = af.database.list('/guestMessages');
-  }
+	constructor(af: AngularFire, sharedDataService: SharedDataService, router: Router, private route: ActivatedRoute) {
+		this.af = af;
+		sharedDataService.setAF(af);
 
-  addMessage(newMessage: string) {
-    this.guestMessages.push({content: newMessage})
-  }
+		af.auth.subscribe(auth => {
+			if (!auth) {// in case of logout
+				return;
+			}
 
-  onMessageInputKeyUp(keyCode: number, message: string) {
-    if (keyCode === 13 && message !== '') {
-      this.addMessage(message);
-    }
-  }
+			sharedDataService.setAuth(auth);
+			//sharedDataService.checkIfAdmin();
+		});
+	}
 }

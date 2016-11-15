@@ -1,0 +1,19 @@
+<form style="margin-top: 40px;">
+	<div>
+		<label for="projectName">Project Name</label>
+		<input type="text"
+				 id="projectName"
+				 name="projectDetails"
+				 required
+				 [(ngModel)]="projectDetails.name"
+				 #projectDetailsInput="ngModel">
+		<div [hidden]="projectDetailsInput.valid || projectDetailsInput.pristine">Please provide a project name.</div>
+
+	</div>
+</form>
+
+<button
+	class="cnp-btn"
+	(click)="onCreate()"
+	style="margin-top: 40px;">Create
+</button>

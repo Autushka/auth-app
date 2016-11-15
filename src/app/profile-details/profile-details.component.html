@@ -1,0 +1,26 @@
+<img *ngIf="profileDetails?.photoURL"
+     [src]="profileDetails?.photoURL"
+     style="height: 40px; width: 40px; margin-top: 40px;">
+<div style=""
+     *ngIf="profileDetails?.firstName">
+  First Name:
+</div>
+<div>
+  {{ profileDetails?.firstName }}
+</div>
+
+<div *ngIf="profileDetails?.lastName"
+     style="margin-top: 10px;">
+  Last Name:
+</div>
+<div>
+  {{ profileDetails?.lastName }}
+</div>
+
+<div *ngIf="profileDetails?.email"
+     style="margin-top: 10px;">
+  Email:
+</div>
+<div>
+  {{ profileDetails?.email }}
+</div>

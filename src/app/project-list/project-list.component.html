@@ -1,0 +1,6 @@
+<p>
+  Projects List
+</p>
+
+<button (click)="onAdd()">Add</button>
+<div *ngFor="let project of projectList; let i = index;">{{ project.name }}</div>

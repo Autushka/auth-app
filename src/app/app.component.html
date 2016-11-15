@@ -1,16 +1,13 @@
-<div class="navbar-header">
-  <button class="btn btn-primary btn-margin" (click)="auth.login()" *ngIf="!auth.authenticated()">Log In</button>
-  <button class="btn btn-primary btn-margin" (click)="auth.logout()" *ngIf="auth.authenticated()">Log Out</button>
-</div>
+<app-busy-indicator></app-busy-indicator>
 
-<input type="text" #newmessage style="margin-top: 30px;" (keyup)="onMessageInputKeyUp($event.keyCode, newmessage.value)"/>
-<button (click)="addMessage(newmessage.value)">Add guest message</button>
+<router-outlet></router-outlet>
 
-<ul style="margin-top: 30px;">
-  <li *ngFor="let message of guestMessages | async">
-    {{ message.content }}
-  </li>
-</ul>
+
+
+
+
+
+
 
 
 
