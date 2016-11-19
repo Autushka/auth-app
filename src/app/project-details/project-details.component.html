@@ -1,0 +1,18 @@
+<button (click)="onBack()">Back</button>
+
+<form [formGroup]="projectForm" style="margin-top: 40px;">
+	<div>
+		<label for="projectName">Project Name</label>
+		<input type="text"
+				 id="projectName"
+				 name="projectDetails"
+				 [formControl]="projectForm.controls['projectName']">
+		<div *ngIf="!projectForm.valid && projectForm.touched">Please provide a project name.</div>
+	</div>
+</form>
+
+<button
+	class="cnp-btn"
+	(click)="onSubmit()"
+	style="margin-top: 40px;">{{projectGuid ? 'Modify' : 'Create'}}
+</button>

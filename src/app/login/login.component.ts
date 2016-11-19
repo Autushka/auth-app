@@ -1,7 +1,7 @@
 import {Component, OnInit, ApplicationRef} from '@angular/core';
 import {AngularFire} from "angularfire2";
-import {SharedDataService} from "../shared-data.service";
 import {Router} from "@angular/router";
+import {GlobalsService} from "../services/globals.service";
 
 @Component({
 	selector: 'app-login',
@@ -13,11 +13,11 @@ export class LoginComponent implements OnInit {
 	isBusyIndicatorShown: boolean;
 	router: Router;
 
-	constructor(af: AngularFire, sharedDataService: SharedDataService, router: Router,) {
+	constructor(af: AngularFire, globalsService: GlobalsService, router: Router,) {
 		this.af = af;
 		this.router = router;
 
-		sharedDataService.busyIndicatorStateChange$.subscribe(
+		globalsService.busyIndicatorStateChange$.subscribe(
 			isBusyIndicatorShown => {
 				this.isBusyIndicatorShown = isBusyIndicatorShown;
 			});

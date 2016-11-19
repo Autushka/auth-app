@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {SharedDataService} from "../shared-data.service";
+import {GlobalsService} from "../services/globals.service";
 
 @Component({
   selector: 'app-busy-indicator',
@@ -9,8 +9,8 @@ import {SharedDataService} from "../shared-data.service";
 export class BusyIndicatorComponent implements OnInit {
   isBusyIndicatorShown: boolean;
 
-  constructor(sharedDataService: SharedDataService) {
-    sharedDataService.busyIndicatorStateChange$.subscribe(
+  constructor(globalsService: GlobalsService) {
+	  globalsService.busyIndicatorStateChange$.subscribe(
       isBusyIndicatorShown => {
         this.isBusyIndicatorShown = isBusyIndicatorShown;
       });

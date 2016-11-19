@@ -3,7 +3,7 @@ import {ActivatedRouteSnapshot, Resolve} from "@angular/router";
 import {ProjectEntityService} from "../services/project-entity.service";
 
 @Injectable()
-export class ProjectListResolverService  implements Resolve<any> {
+export class ProjectDetailsResolverService  implements Resolve<any> {
 	projectEntityService: ProjectEntityService;
 
 	constructor(projectEntityService: ProjectEntityService) {
@@ -14,15 +14,15 @@ export class ProjectListResolverService  implements Resolve<any> {
 		let that = this;
 
 		return new Promise((resolve, reject) => {
-			this.projectEntityService.projectListStateChange$.subscribe(
-				projectList => {
-					if(!this.projectEntityService.isProjectListInitialized){
-						this.projectEntityService.initializeProjectList({showBusyIndicator: true});
+			this.projectEntityService.projectDetailsStateChange$.subscribe(
+				projectDetails => {
+					if(!this.projectEntityService.isProjectDetailsInitialized){
+						this.projectEntityService.isProjectDetailsInitialized = true;
+						this.projectEntityService.getProject(route.params['guid'], {showBusyIndicator: true});
 					}else{
-						resolve(projectList);
+						resolve(projectDetails);
 					}
 				});
 		});
 	}
 }
-

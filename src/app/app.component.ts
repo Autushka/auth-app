@@ -1,9 +1,6 @@
-import {Component, ApplicationRef} from '@angular/core';
-import {AngularFire, FirebaseListObservable, FirebaseObjectObservable} from 'angularfire2';
-import {Router, ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs";
-import {SharedDataService} from "./shared-data.service";
-import {AuthGuardService} from "./auth-guard.service";
+import {Component} from '@angular/core';
+import {AngularFire} from 'angularfire2';
+import {UserAccountService} from "./services/user-account.service";
 
 @Component({
 	selector: 'app-root',
@@ -15,17 +12,16 @@ export class AppComponent {
 	title: string;
 	af: AngularFire;
 
-	constructor(af: AngularFire, sharedDataService: SharedDataService, router: Router, private route: ActivatedRoute) {
+	constructor(af: AngularFire, userAccountService: UserAccountService) {
 		this.af = af;
-		sharedDataService.setAF(af);
+		userAccountService.setAF(af);
 
 		af.auth.subscribe(auth => {
 			if (!auth) {// in case of logout
 				return;
 			}
 
-			sharedDataService.setAuth(auth);
-			//sharedDataService.checkIfAdmin();
+			userAccountService.setAuth(auth);
 		});
 	}
 }

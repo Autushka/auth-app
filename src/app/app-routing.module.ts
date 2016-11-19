@@ -7,9 +7,10 @@ import {ProfileDetailsComponent} from "./profile-details/profile-details.compone
 import {ProjectListComponent} from "./project-list/project-list.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {ProfileDetailsResolverService} from "./profile-details/profile-details-resolver.service";
-import {NewProjectComponent} from "./new-project/new-project.component";
+import {ProjectDetailsComponent} from "./project-details/project-details.component";
 import {ProjectListResolverService} from "./project-list/project-list-resolver.service";
 import {LandingPageResolverService} from "./landing-page/landing-page-resolver.service";
+import {ProjectDetailsResolverService} from "./project-details/project-details-resolver.service";
 
 
 @NgModule({
@@ -46,8 +47,15 @@ import {LandingPageResolverService} from "./landing-page/landing-page-resolver.s
 						}
 					},
 					{
-						path: 'new-project',
-						component: NewProjectComponent,
+						path: 'project-details',
+						component: ProjectDetailsComponent,
+					},
+					{
+						path: 'project-details/:guid',
+						component: ProjectDetailsComponent,
+						resolve: {
+							resolvedProjectDetails: ProjectDetailsResolverService
+						}
 					}
 				]
 			},
@@ -63,7 +71,7 @@ import {LandingPageResolverService} from "./landing-page/landing-page-resolver.s
 			}
 		])
 	],
-	providers: [ProfileDetailsResolverService, ProjectListResolverService, LandingPageResolverService],
+	providers: [ProfileDetailsResolverService, ProjectListResolverService, LandingPageResolverService, ProjectDetailsResolverService],
 	exports: [
 		RouterModule
 	]

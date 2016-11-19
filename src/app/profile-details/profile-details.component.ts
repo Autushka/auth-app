@@ -1,6 +1,6 @@
 import {Component, OnInit, ApplicationRef} from '@angular/core';
-import {SharedDataService} from "../shared-data.service";
 import {ActivatedRoute} from "@angular/router";
+import {UserAccountService} from "../services/user-account.service";
 
 @Component({
   selector: 'app-profile-details',
@@ -10,11 +10,11 @@ import {ActivatedRoute} from "@angular/router";
 export class ProfileDetailsComponent implements OnInit {
   profileDetails: ProfileDetails;
 
-  constructor(sharedDataService: SharedDataService, private route: ActivatedRoute) {
+  constructor(userAccountService: UserAccountService, private route: ActivatedRoute) {
 	  let that = this;
 	  this.profileDetails = route.snapshot.data['resolvedProfileDetails'];
 
-	  sharedDataService.profileDetailsStateChange$.subscribe(
+	  userAccountService.profileDetailsStateChange$.subscribe(
 		  profileDetails => {
 			  that.profileDetails = profileDetails;
 		  });

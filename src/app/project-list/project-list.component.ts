@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from "@angular/router";
-import {SharedDataService} from "../shared-data.service";
+import {ProjectEntityService} from "../services/project-entity.service";
 
 @Component({
 	selector: 'app-project-list',
@@ -10,15 +10,20 @@ import {SharedDataService} from "../shared-data.service";
 export class ProjectListComponent implements OnInit {
 	router: Router;
 	projectList = [];
+	projectEntityService: ProjectEntityService;
 
-	constructor(router: Router, private route: ActivatedRoute, sharedDataService: SharedDataService) {
+	constructor(router: Router, private route: ActivatedRoute, projectEntityService: ProjectEntityService) {
 		let that = this;
 		this.router = router;
+		this.projectEntityService = projectEntityService;
 
 		this.projectList = route.snapshot.data['resolvedProjectList'];
 
-		sharedDataService.projectListStateChange$.subscribe(
+		projectEntityService.projectListStateChange$.subscribe(
 			projectList => {
+				for(let project of projectList){
+					project.createdAt = new Date(project.createdAt).toLocaleDateString() + ' ' + new Date(project.createdAt).toLocaleTimeString();
+				}
 				that.projectList = projectList;
 			});
 	}
@@ -27,6 +32,14 @@ export class ProjectListComponent implements OnInit {
 	}
 
 	onAdd() {
-		this.router.navigate(['/landing-page/new-project']);
+		this.router.navigate(['/landing-page/project-details']);
+	}
+
+	onDelete(index) {
+		this.projectEntityService.deleteProject(this.projectList[index].$key);
+	}
+
+	onEdit(index) {
+		this.router.navigate(['/landing-page/project-details/' + this.projectList[index].$key]);
 	}
 }

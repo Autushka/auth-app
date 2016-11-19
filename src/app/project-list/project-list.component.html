@@ -1,6 +1,24 @@
 <p>
-  Projects List
+	Projects List
 </p>
 
-<button (click)="onAdd()">Add</button>
-<div *ngFor="let project of projectList; let i = index;">{{ project.name }}</div>
+<button (click)="onAdd()" style="margin-bottom: 40px;">Add</button>
+<div *ngFor="let project of projectList; let i = index;">
+	<div class="container" style="margin-bottom: 10px;">
+		<div class="row">
+			<div class="gr-4">
+				<div>{{ project.name }}</div>
+			</div>
+
+			<div class="gr-4">
+				<div>{{ project.createdAt }}</div>
+			</div>
+			<div class="gr-2">
+				<button class="float-right" (click)="onEdit(i)">Edit</button>
+			</div>
+			<div class="gr-2">
+				<button class="float-right" (click)="onDelete(i)">Delete</button>
+			</div>
+		</div>
+	</div>
+</div>

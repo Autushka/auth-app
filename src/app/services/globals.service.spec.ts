@@ -1,16 +1,16 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async, inject } from '@angular/core/testing';
-import { SharedDataService } from './shared-data.service';
+import { GlobalsService } from './globals.service';
 
-describe('Service: SharedData', () => {
+describe('Service: Globals', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SharedDataService]
+      providers: [GlobalsService]
     });
   });
 
-  it('should ...', inject([SharedDataService], (service: SharedDataService) => {
+  it('should ...', inject([GlobalsService], (service: GlobalsService) => {
     expect(service).toBeTruthy();
   }));
 });

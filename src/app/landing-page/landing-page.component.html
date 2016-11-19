@@ -1,13 +1,13 @@
 <div class="container" style="height: 100%;">
   <div class="row row-align-middle row-align-center no-margin" style="height: 100%;">
-    <div class="gr-10@xs gr-6@sm gr-6@md gr-4@lg">
+    <div class="gr-10@xs gr-8@sm gr-8@md gr-8@lg">
       <!--<app-profile-details></app-profile-details>-->
 		 <button class="cnp-btn cnp-primary-btn" style="margin-bottom: 40px;"
 					(click)="onLogout()">Logout
 		 </button>
 
 		 <div style="margin-bottom: 10px;"><a [routerLink]="['profile-details']">View Profile</a></div>
-		 <div><a [routerLink]="['project-list']">Manage Projects</a></div>
+		 <div style="margin-bottom: 40px;"><a [routerLink]="['project-list']">Manage Projects</a></div>
 
 		 <router-outlet></router-outlet>
     </div>

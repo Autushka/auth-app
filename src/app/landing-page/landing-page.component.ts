@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {AngularFire} from "angularfire2";
-import {Router, ActivatedRoute} from "@angular/router";
-import {SharedDataService} from "../shared-data.service";
+import {Router} from "@angular/router";
+import {UserAccountService} from "../services/user-account.service";
+import {GlobalsService} from "../services/globals.service";
+import {ProjectEntityService} from "../services/project-entity.service";
 
 @Component({
 	selector: 'app-landing-page',
@@ -9,23 +11,29 @@ import {SharedDataService} from "../shared-data.service";
 	styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent implements OnInit {
-	sharedDataService: SharedDataService;
+	userAccountService: UserAccountService;
+	globalsService: GlobalsService;
+	projectEntityService: ProjectEntityService;
+
 	router: Router;
 	af: AngularFire;
 
-	constructor(af: AngularFire, router: Router, sharedDataService: SharedDataService, activeRoute: ActivatedRoute) {
+	constructor(af: AngularFire, router: Router, userAccountService: UserAccountService, globalsService: GlobalsService, projectEntityService: ProjectEntityService) {
 		this.af = af;
 		this.router = router;
-		this.sharedDataService = sharedDataService;
-
-		this.sharedDataService.initializeProfileDetails({showBusyIndicator: false});
+		this.userAccountService = userAccountService;
+		this.globalsService = globalsService;
+		this.projectEntityService = projectEntityService;
 	}
 
 	ngOnInit() {
 	}
 
 	onLogout() {
-		this.sharedDataService.initializeSharedData();
+		this.userAccountService.initialize();
+		this.globalsService.initialize();
+		this.projectEntityService.initialize();
+
 		this.af.auth.logout();
 		this.router.navigate(['/login']);
 	}

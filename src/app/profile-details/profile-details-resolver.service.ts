@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from "@angular/router";
-import {SharedDataService} from "../shared-data.service";
+import {UserAccountService} from "../services/user-account.service";
 
 @Injectable()
 export class ProfileDetailsResolverService  implements Resolve<any> {
-	sharedDataService: SharedDataService;
+	userAccountService: UserAccountService;
 
-  constructor(sharedDataService: SharedDataService) {
-	  this.sharedDataService = sharedDataService;
+  constructor(userAccountService: UserAccountService) {
+	  this.userAccountService = userAccountService;
   }
 
 	resolve(route: ActivatedRouteSnapshot) {
@@ -16,10 +16,10 @@ export class ProfileDetailsResolverService  implements Resolve<any> {
 		return new Promise((resolve, reject) => {
 			let profileDetails: ProfileDetails;
 
-			this.sharedDataService.profileDetailsStateChange$.subscribe(
+			this.userAccountService.profileDetailsStateChange$.subscribe(
 			  profileDetails => {
-				  if(!this.sharedDataService.isProfileDetailsInitialized){
-					  this.sharedDataService.initializeProfileDetails({showBusyIndicator: true});
+				  if(!this.userAccountService.isProfileDetailsInitialized){
+					  this.userAccountService.initializeProfileDetails({showBusyIndicator: true});
 				  }else{
 					  resolve(profileDetails);
 				  }
