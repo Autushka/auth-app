@@ -21,9 +21,6 @@ export class ProjectListComponent implements OnInit {
 
 		projectEntityService.projectListStateChange$.subscribe(
 			projectList => {
-				for(let project of projectList){
-					project.createdAt = new Date(project.createdAt).toLocaleDateString() + ' ' + new Date(project.createdAt).toLocaleTimeString();
-				}
 				that.projectList = projectList;
 			});
 	}

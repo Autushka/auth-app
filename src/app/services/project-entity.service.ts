@@ -46,13 +46,13 @@ export class ProjectEntityService {
 		this.projectList = new BehaviorSubject([]);
 		this.projectListSnapshot = [];
 		this.isProjectListInitialized = false;
-		if(this.projectListSubscriber){
+		if (this.projectListSubscriber) {
 			this.projectListSubscriber.unsubscribe();
 		}
 
 		this.projectDetails = new BehaviorSubject({name: ''});
 		this.isProjectDetailsInitialized = false;
-		if(this.projectDetailsSubscriber){
+		if (this.projectDetailsSubscriber) {
 			this.projectDetailsSubscriber.unsubscribe();
 		}
 
@@ -60,7 +60,7 @@ export class ProjectEntityService {
 		this.projectDetailsStateChange$ = this.projectDetails.asObservable();
 	}
 
-	getProject(guid, params: FireBaseCallParams){
+	getProject(guid, params: FireBaseCallParams) {
 		let that = this;
 		if (this.userAccountService.isAdmin) {
 			this.projectDetailsAF = this.userAccountService.af.database.object('/projects/' + guid);//.subscribe(data => {return data});
@@ -125,7 +125,6 @@ export class ProjectEntityService {
 
 	initializeProjectList(params: FireBaseCallParams) {
 		let that = this;
-
 		this.isProjectListInitialized = true;
 
 		if (params.showBusyIndicator) {
@@ -133,25 +132,24 @@ export class ProjectEntityService {
 		}
 
 		if (this.userAccountService.isAdmin) {
-			this.projectListAF = this.userAccountService.af.database.list('/projects', {
-				query: {
-					orderByChild: 'createdAt'
-				}
-			});
+			this.projectListAF = this.userAccountService.af.database.list('/projects');
 		} else {
-			this.projectListAF = this.userAccountService.af.database.list('/users/' + this.userAccountService.auth.uid + '/projects', {
-				query: {
-					orderByChild: 'createdAt'
-				}
-			});
+			this.projectListAF = this.userAccountService.af.database.list('/users/' + this.userAccountService.auth.uid + '/projects');
 		}
 
-		this.projectListSubscriber = this.projectListAF.subscribe(data => {
-			that.changeProjectListState(data.reverse());//making sure that sorting is in descending order
-
+		this.projectListAF.subscribe(projects => {
 			if (params.showBusyIndicator) {
 				this.globalsService.changeBusyIndicatorState(false);
 			}
+			that.changeProjectListState(projects);
+
+
+			// Observable.forkJoin(projectUserKeysObs)
+			// 	.subscribe(projectUserKeys => {
+			// 		let projectUsersObsList = [];
+
+
 		});
+
 	}
 }
