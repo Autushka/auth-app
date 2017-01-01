@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from "rxjs";
-import {
-	FirebaseObjectObservable,
-	FirebaseListObservable
-} from "angularfire2";
+
 import anything = jasmine.anything;
 import {GlobalsService} from "./globals.service";
 import {UserAccountService} from "./user-account.service";
+import * as firebase from 'firebase';
+import * as _ from 'lodash';
+import {DataMappingService} from "./data-mapping.service";
 
 @Injectable()
 export class ProjectEntityService {
@@ -19,17 +19,19 @@ export class ProjectEntityService {
 	projectDetailsSubscriber: any;
 	isProjectDetailsInitialized: boolean;
 
-	projectListAF: FirebaseListObservable<any>;
-	projectDetailsAF: FirebaseObjectObservable<any>;
+	projectListAF: Observable<any>;
+	projectDetailsAF: Observable<any>;
 	projectListStateChange$: any;
 	projectDetailsStateChange$: any;
 
 	globalsService: GlobalsService;
 	userAccountService: UserAccountService;
+	dataMappingService: DataMappingService;
 
-	constructor(globalsService: GlobalsService, userAccountService: UserAccountService) {
+	constructor(globalsService: GlobalsService, userAccountService: UserAccountService, dataMappingService: DataMappingService) {
 		this.globalsService = globalsService;
 		this.userAccountService = userAccountService;
+		this.dataMappingService = dataMappingService;
 		this.initialize();
 	}
 
@@ -60,96 +62,146 @@ export class ProjectEntityService {
 		this.projectDetailsStateChange$ = this.projectDetails.asObservable();
 	}
 
-	getProject(guid, params: FireBaseCallParams) {
+	getProject(projectKey, withUsersDetails: boolean, globalParams: FireBaseCallParams) {
 		let that = this;
-		if (this.userAccountService.isAdmin) {
-			this.projectDetailsAF = this.userAccountService.af.database.object('/projects/' + guid);//.subscribe(data => {return data});
-		} else {
-			this.projectDetailsAF = this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + guid);//.subscribe(data => {return data});
-		}
+		let response: any = {};
 
-		if (params.showBusyIndicator) {
+		this.projectDetailsAF = this.userAccountService.af.database.object('/projects/' + projectKey).map(item => {
+			return item;
+		});
+
+		if (globalParams.showBusyIndicator) {
 			this.globalsService.changeBusyIndicatorState(true);
 		}
 
-		this.projectDetailsSubscriber = this.projectDetailsAF.subscribe(data => {
-			that.changeProjectDetailsState({name: data.name});//making sure that sorting is in descending order
+		this.projectDetailsAF.subscribe(data => {
+			if (withUsersDetails) {
+				let usersObj = [];
 
-			if (params.showBusyIndicator) {
-				this.globalsService.changeBusyIndicatorState(false);
+				_.forEach(data.users, function (value, key) {
+					usersObj.push(that.userAccountService.af.database.object('/users/' + key).first());
+				});
+
+				Observable.forkJoin(usersObj).subscribe(users => {
+					let userList = [];
+
+					_.forEach(users, function (item) {
+						userList.push(item);
+					});
+
+					data.users = userList;  //dependency on user entity
+
+					that.changeProjectDetailsState(that.dataMappingService.project.toVM(data));
+
+					if (globalParams.showBusyIndicator) {
+						that.globalsService.changeBusyIndicatorState(false);
+					}
+				});
+			} else {
+				that.changeProjectDetailsState(that.dataMappingService.project.toVM(data));
+
+				if (globalParams.showBusyIndicator) {
+					that.globalsService.changeBusyIndicatorState(false);
+				}
 			}
 		});
 	}
 
-	deleteProject(guid) {
-		this.userAccountService.af.database.object('/projects/' + guid).remove();// remove project from the global list
-		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + guid).remove();// remove project from the user project list
+	deleteProject(projectKey) {
+		this.userAccountService.af.database.object('/projects/' + projectKey).remove();// remove project from the global list
+		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + projectKey).remove();// remove project from the user project list
 	}
 
-	updateProject(guid: string, projectDetails: ProjectDetails) {
-		this.userAccountService.af.database.object('/projects/' + guid).update({name: projectDetails.name});
-		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + guid).update({name: projectDetails.name});
+	updateProject(projectDetails: ProjectDetails) {
+		this.userAccountService.af.database.object('/projects/' + projectDetails.projectKey).update({name: projectDetails.projectName});
 	}
 
 	createProject(projectDetails: ProjectDetails) {
-		let guid = this.globalsService.generateGuild();
 		let createdAt = (new Date()).getTime();
 
-		this.userAccountService.af.database.object('/projects/' + guid).set({
-			name: projectDetails.name,
-			createdBy: this.userAccountService.auth.uid,
-			createdAt: createdAt
-		});
+		let projectId = this.userAccountService.af.database.list('/projects').push({
+			name: projectDetails.projectName,
+			members: 1,
+			createdBy: this.userAccountService.profileDetailsSnapshot.fullName,
+			createdAt: firebase.database.ServerValue.TIMESTAMP //making sure that timestamp sent is equal current server time
+		}).key;
 
-		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + guid).set({
-			name: projectDetails.name,
-			createdBy: this.userAccountService.auth.uid,
-			createdAt: createdAt
-		});
-
-		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + guid + '/roles/admin').set({
-			admin: true
-		});
-
-		this.userAccountService.af.database.object('/projects/' + guid + '/users/' + this.userAccountService.auth.uid).set({
-			firstName: this.userAccountService.profileDetailsSnapshot.firstName,
-			lastName: this.userAccountService.profileDetailsSnapshot.lastName,
-			email: this.userAccountService.profileDetailsSnapshot.email,
-			photoURL: this.userAccountService.profileDetailsSnapshot.photoURL
-		});
-
-		this.userAccountService.af.database.object('/projects/' + guid + '/users/' + this.userAccountService.auth.uid + '/roles/admin').set({
-			admin: true
-		});
+		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + projectId + '/userRoles/admin').set({admin: true});
+		this.userAccountService.af.database.object('/projects/' + projectId + '/users/' + this.userAccountService.auth.uid + '/userRoles/admin').set({admin: true});
 	}
 
-	initializeProjectList(params: FireBaseCallParams) {
-		let that = this;
-		this.isProjectListInitialized = true;
+	assignUserToProject(params) {
+		let roleObj = {};
 
-		if (params.showBusyIndicator) {
+		roleObj[params.userRole] = true;
+		this.userAccountService.af.database.object('/users/' + this.userAccountService.auth.uid + '/projects/' + params.projectKey + '/userRoles/' + params.userRole).set(roleObj);
+
+		this.userAccountService.af.database.object('/projects/' + params.projectKey + '/users/' + this.userAccountService.auth.uid + '/userRoles/' + params.userRole).set(roleObj);
+	}
+
+	initializeProjectList(globalParams: FireBaseCallParams) {
+		let that = this;
+
+		if (globalParams.showBusyIndicator) {
 			this.globalsService.changeBusyIndicatorState(true);
 		}
 
 		if (this.userAccountService.isAdmin) {
-			this.projectListAF = this.userAccountService.af.database.list('/projects');
+			this.projectListAF = this.userAccountService.af.database.list('/projects', {
+				query: {
+					orderByKey: true
+				}
+			});
 		} else {
-			this.projectListAF = this.userAccountService.af.database.list('/users/' + this.userAccountService.auth.uid + '/projects');
+			this.projectListAF = this.userAccountService.af.database.list('/users/' + this.userAccountService.auth.uid + '/projects', {
+				query: {
+					orderByKey: true
+				}
+			}).map(userProjects => {
+				return userProjects.map(userProject => {
+					return this.userAccountService.af.database.object('/projects/' + userProject.$key);
+				})
+			}).flatMap((projectsObs) => {
+				return Observable.combineLatest(projectsObs);
+			});
 		}
 
 		this.projectListAF.subscribe(projects => {
-			if (params.showBusyIndicator) {
-				this.globalsService.changeBusyIndicatorState(false);
+			if (that.userAccountService.isAdmin) {
+				let projectList = [];
+				that.isProjectListInitialized = true;
+
+				_.forEach(projects, function (item) {
+					projectList.push(that.dataMappingService.project.toVM(item));
+				});
+
+				that.changeProjectListState(projectList.reverse());
+
+				if (globalParams.showBusyIndicator) {
+					that.globalsService.changeBusyIndicatorState(false);
+				}
+			} else {
+				let projectsObs = [];
+
+				for (let item of projects.reverse()) {
+					projectsObs.push(that.userAccountService.af.database.object('/projects/' + item.$key).first());
+				}
+
+				Observable.forkJoin(projectsObs).subscribe(projects => {
+					let projectList = [];
+					that.isProjectListInitialized = true;
+
+					_.forEach(projects, function (item) {
+						projectList.push(that.dataMappingService.project.toVM(item));
+					});
+
+					that.changeProjectListState(projectList);
+
+					if (globalParams.showBusyIndicator) {
+						that.globalsService.changeBusyIndicatorState(false);
+					}
+				});
 			}
-			that.changeProjectListState(projects);
-
-
-			// Observable.forkJoin(projectUserKeysObs)
-			// 	.subscribe(projectUserKeys => {
-			// 		let projectUsersObsList = [];
-
-
 		});
-
 	}
 }

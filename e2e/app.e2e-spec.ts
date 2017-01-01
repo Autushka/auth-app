@@ -1,10 +1,10 @@
-import { AuthApp3Page } from './app.po';
+import { AuthAppPage } from './app.po';
 
-describe('auth-app3 App', function() {
-  let page: AuthApp3Page;
+describe('auth-app App', function() {
+  let page: AuthAppPage;
 
   beforeEach(() => {
-    page = new AuthApp3Page();
+    page = new AuthAppPage();
   });
 
   it('should display message saying app works', () => {

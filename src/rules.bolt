@@ -1,0 +1,147 @@
+path /userRoles is UserRole {
+  read() { isAuthenticatedUser() }
+  write() { false }
+}
+
+path /taskStatuses is TaskStatus {
+   read() { isAuthenticatedUser() }
+   write() { false }
+}
+
+path /invitationStatuses is InvitationStatus {
+   read() { isAuthenticatedUser() }
+   write() { false }
+}
+
+path /admins/{adminId} {
+  read() { isCurrentUser(adminId) }
+  write() { false }
+}
+
+//
+// Users
+//
+path /users/{userId} is User{
+   read() { isCurrentUserOrAdmin(userId) }
+   write() { isCurrentUserOrAdmin(userId) }
+}
+
+path /users/{userId}/projects/{projectId} {
+  validate() { projectExists(projectId) }
+}
+
+path /users/{userId}/projects/{projectId}/userRoles/{roleId} {
+  validate() { userRoleExists(roleId) }
+}
+
+//
+// Projects
+//
+path /projects {
+   read() { isAdmin() }
+}
+
+path /projects/{projectId} is Project{
+   read() { isAdmin() || isAssignedToProject(projectId)}
+   create() { isAuthenticatedUser() }
+   update() { isAdmin() || isProjectAdmin(projectId) || checkInvitationExistence(projectId, root.users[auth.uid].email)}
+   delete() { isAdmin() || isProjectAdmin(projectId) }
+}
+
+path /projects/{projectId}/users/{userId} {
+	validate() {root.users[userId] != null}
+}
+
+path /projects/{projectId}/users/{userId}/userRoles/{roleId} {
+	validate() { userRoleExists(roleId) }
+}
+
+path /invitationsToEmail {
+	read() { isAdmin() }
+}
+
+path /invitationsToEmail/{email}{
+ 	read() { isAdmin() || root.users[auth.uid].email == email}
+}
+
+
+path /invitationsToEmail/{email}/projectAssignment/{projectKey}/invitations/{invitationId} is Invitation{
+	create() {isAdmin() || isProjectAdmin(projectKey)}
+	update() {isAdmin() || isProjectAdmin(projectKey) || root.users[auth.uid].email == email }
+	validate() { root.projects[projectKey] != null }
+}
+
+path /invitationsToEmail/{email}/projectAssignment/{projectKey}/invitations/{invitationId}/userRoles/{roleId} {
+	validate() { userRoleExists(roleId) }
+}
+
+type UserRole {
+ 	description: String
+ 	validate(){this.description.length <= 100}
+}
+
+type TaskStatus {
+	description: String
+	validate(){this.description.length <= 100}
+}
+
+type InvitationStatus {
+	description: String
+	validate(){this.description.length <= 100}
+}
+
+type Invitation {
+	projectName: String,
+	status: String,
+	createdBy: CurrentUserFullName,
+	createdAt: CurrentTimestamp,
+	validate() {root.invitationStatuses[this.status] != null}
+}
+
+type User {
+	firstName: String,
+	lastName: String,
+	email: String,
+	photoURL: String
+}
+
+type Project {
+	name: String,
+	createdBy: CurrentUserFullName,
+	createdAt: CurrentTimestamp,
+	members: Number,
+}
+
+//
+// Helper Types
+//
+type CurrentUserId extends String {
+  validate() { this == auth.uid }
+}
+type CurrentUserFullName extends String {
+  validate() { (root.users[auth.uid]['firstName'] + ' ' + root.users[auth.uid]['lastName']) == this}
+}
+type CurrentTimestamp extends Number {
+  validate() { this == now }
+}
+
+//
+// Functions
+//
+isAuthenticatedUser() { auth != null }
+isCurrentUser(uid) { auth != null && auth.uid == uid }
+isCurrentUserOrAdmin(uid){
+	auth != null && auth.uid == uid || root.admins[uid] != null
+}
+isAssignedToProject(projectId){
+	root.users[auth.uid].projects[projectId] != null
+}
+projectExists(projectId){
+ 	root.projects[projectId] != null
+}
+userRoleExists(userRoleId){
+	root.userRoles[userRoleId] != null
+}
+isAdmin(){auth != null && root.admins[auth.uid] != null}
+isProjectAdmin(projectId){auth != null && root.projects[projectId].users[auth.uid].userRoles.admin != null}
+checkInvitationExistence(projectId, email){root.invitations[email].projectAssignment[projectId].invitations != null}

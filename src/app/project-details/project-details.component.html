@@ -7,12 +7,26 @@
 				 id="projectName"
 				 name="projectDetails"
 				 [formControl]="projectForm.controls['projectName']">
-		<div *ngIf="!projectForm.valid && projectForm.touched">Please provide a project name.</div>
+		<div *ngIf="!projectForm.controls['projectName'].valid && projectForm.controls['projectName'].touched">Please
+			provide a project name.
+		</div>
 	</div>
 </form>
+
+<div style="margin-top: 40px;">
+	<label for="projectName">Current role: {{projectDetails.currentUserRole}}</label>
+</div>
 
 <button
 	class="cnp-btn"
 	(click)="onSubmit()"
-	style="margin-top: 40px;">{{projectGuid ? 'Modify' : 'Create'}}
+	style="margin-top: 40px;">{{projectKey ? 'Modify' : 'Create'}}
 </button>
+
+<div style="margin-top: 40px;">
+	<project-users [projectKey]="projectKey" [projectUsers]="projectDetails.projectUsers"></project-users>
+</div>
+
+<div style="margin-top: 40px;" *ngIf="projectKey">
+	<new-invitation [projectDetails]="projectDetails"></new-invitation>
+</div>

@@ -18,6 +18,11 @@ import {ProjectDetailsComponent} from './project-details/project-details.compone
 import {UserAccountService} from "./services/user-account.service";
 import {GlobalsService} from "./services/globals.service";
 import {ProjectEntityService} from "./services/project-entity.service";
+import {InvitationService} from "./services/invitation.service";
+import { InvitationListComponent } from './invitation-list/invitation-list.component';
+import { ProjectUsersComponent } from './project-details/project-users/project-users.component';
+import { NewInvitationComponent } from './project-details/new-invitation/new-invitation.component';
+import {DataMappingService} from "./services/data-mapping.service";
 
 // Must export the config
 export const firebaseConfig = {
@@ -42,7 +47,10 @@ const firebaseAuthConfig = {
 		ProfileDetailsComponent,
 		ProjectListComponent,
 		DashboardComponent,
-		ProjectDetailsComponent
+		ProjectDetailsComponent,
+		InvitationListComponent,
+		ProjectUsersComponent,
+		NewInvitationComponent
 	],
 	imports: [
 		BrowserModule,
@@ -53,7 +61,7 @@ const firebaseAuthConfig = {
 		FormsModule,
 		ReactiveFormsModule
 	],
-	providers: [AuthGuardService, UserAccountService, GlobalsService, ProjectEntityService],
+	providers: [AuthGuardService, UserAccountService, GlobalsService, ProjectEntityService, InvitationService, DataMappingService],
 	bootstrap: [AppComponent]
 })
 export class AppModule {

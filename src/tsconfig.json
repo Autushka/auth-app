@@ -18,7 +18,7 @@
 			"../src/types"
 		],
 		"types": [
-			"conspector", "jasmine"
+			"conspector", "jasmine", "lodash"
 		]
 	}
 }

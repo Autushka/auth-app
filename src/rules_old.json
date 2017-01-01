@@ -1,0 +1,133 @@
+{
+	"rules": {
+		"roles": {
+			".read": "auth != null",
+			".write": "false"
+		},
+		"taskStatuses": {
+			".read": "auth != null",
+			".write": "false"
+		},
+		"invitationStatuses": {
+			".read": "auth != null",
+			".write": "false"
+		},
+		"admins":{
+			"$admin": {
+				".read": "auth.uid === $admin",
+				".write": "false"
+			}
+		},
+		"users": {
+			"$user": {
+				// user record can be read by the user himself or by global administrator
+				".read": "auth != null && (auth.uid === $user || root.child('admins/' + $user).exists())",
+				// user record can be modified(created, updated, deleted) by the user himself or by global administrator
+				".write": "auth.uid === $user || root.child('admins/' + $user).exists()",
+				".validate": "newData.hasChildren(['firstName', 'lastName', 'email'])",
+				"firstName": {
+					".validate": "newData.isString()",
+				},
+
+				"lastName": {
+					".validate": "newData.isString()",
+				},
+
+				"email": {
+					".validate": "newData.isString()",
+				},
+				"photoURL": {
+					".validate": "newData.isString()",
+				},
+				"projects": {
+					"$project": {
+						// project can be assigned to the user only if it exists
+						".validate": "root.child('projects/' + $project).exists()",
+						"roles": {
+							"$role": {
+								".validate": "root.child('roles/' + $role).exists()"
+							}
+						}
+					}
+				},
+				"$other": {
+					".validate": "false"
+				}
+			}
+		},
+
+
+		//     "invitations": {
+		//       //$invitation is equal to user's email
+		//       "$email": {
+		//         "$invitation": {
+		//           "projectGuid": {
+		//               ".validate": "newData.isString()",
+		//            },
+		//           "status": {
+		//               ".validate": "root.child('invitationStatuses/' + newData.val()).exists()"
+		//           }
+		//         }
+		//       }
+		//     },
+
+		"projects": {
+			//only admin can read all the projects
+			".read": "root.child('admins/' + auth.uid).exists()",
+			"$project": {
+				// project record can be read by the global administrator or by user assigned to the project with the role admin
+				".read": "root.child('admins/' + auth.uid).exists() || root.child('users/' + auth.uid + '/projects/' + $project + '/roles/admin').exists()",
+				// any authenticated user can create a new project record but existing record can be updated/deleted only by the global admininstrator or by user assigned to the project with hte role admin
+				".write": "(!data.exists() && auth.uid != null) || (root.child('admins/' + auth.uid).exists()) || (root.child('users/' + auth.uid + '/projects/' + $project + '/roles/admin').exists())",
+				".validate": "newData.hasChildren(['name', 'createdBy', 'createdAt'])",
+				"name": {
+					".validate": "newData.isString()",
+				},
+				"createdBy": {
+					".validate": "newData.val() === auth.uid",
+				},
+				"createdAt": {
+					".validate": "newData.isNumber()",
+				},
+				"members": {
+					".validate": "newData.isNumber()",
+				},
+				"users": {
+					"$user": {
+						".validate": "root.child('users/' + $user).exists()",
+					}
+				},
+				"$other": {
+					".validate": "false"
+				}
+			}
+		},
+		//     "tasks": {
+		//       "$project": {
+		//         // user is allowed to read tasks/$project only if he has assignment to it
+		//       	".read": "root.child('users/' + auth.uid + '/projects/' + $project).exists()",
+		//         // for now only admin of the project is allowed to write to tasks/$project
+		//       	".write": "root.child('users/' + auth.uid + '/projects/' + $project + '/roles/admin').exists()",
+		// 				".validate": "root.child('projects/' + $project).exists()",
+		//         "$task": {
+		//         	".validate": "newData.hasChildren(['description', 'status', 'createdBy', 'createdAt'])",
+		//           "description": {
+		//             ".validate": "newData.isString()",
+		//           },
+		//           "status": {
+		//             ".validate": "root.child('taskStatuses/' + newData.val()).exists()",
+		//           },
+		//           "createdBy": {
+		//             ".validate": "newData.val() === auth.uid",
+		//           },
+		//           "createdAt": {
+		//             ".validate": "newData.isNumber()",
+		//           },
+		// 					"$other": {
+		//             ".validate": "false"
+		//           }
+		//         }
+		//       }
+		//     },
+	}
+}

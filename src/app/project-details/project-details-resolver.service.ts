@@ -18,7 +18,7 @@ export class ProjectDetailsResolverService  implements Resolve<any> {
 				projectDetails => {
 					if(!this.projectEntityService.isProjectDetailsInitialized){
 						this.projectEntityService.isProjectDetailsInitialized = true;
-						this.projectEntityService.getProject(route.params['guid'], {showBusyIndicator: true});
+						this.projectEntityService.getProject(route.params['guid'], true, {showBusyIndicator: true});
 					}else{
 						resolve(projectDetails);
 					}

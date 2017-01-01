@@ -8,11 +8,10 @@ import {UserAccountService} from "../services/user-account.service";
   styleUrls: ['./profile-details.component.scss']
 })
 export class ProfileDetailsComponent implements OnInit {
-  profileDetails: ProfileDetails;
+  profileDetails: any;
 
-  constructor(userAccountService: UserAccountService, private route: ActivatedRoute) {
+  constructor(userAccountService: UserAccountService) {
 	  let that = this;
-	  this.profileDetails = route.snapshot.data['resolvedProfileDetails'];
 
 	  userAccountService.profileDetailsStateChange$.subscribe(
 		  profileDetails => {

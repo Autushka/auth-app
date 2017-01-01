@@ -6,16 +6,22 @@
 <div *ngFor="let project of projectList; let i = index;">
 	<div class="container" style="margin-bottom: 10px;">
 		<div class="row">
-			<div class="gr-4">
-				<div>{{ project.name }}</div>
+			<div class="gr-3">
+				<div>{{ project.projectName }}</div>
 			</div>
 
-			<div class="gr-4">
-				<div>{{ project.createdAt }}</div>
+			<div class="gr-3">
+				<div>{{ project.createdAt | date:'MM/dd/y'}}</div>
 			</div>
+
+			<div class="gr-2">
+				<div>{{ project.createdBy }}</div>
+			</div>
+
 			<div class="gr-2">
 				<button class="float-right" (click)="onEdit(i)">Edit</button>
 			</div>
+
 			<div class="gr-2">
 				<button class="float-right" (click)="onDelete(i)">Delete</button>
 			</div>

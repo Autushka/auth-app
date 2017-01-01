@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "firebase": "registry:npm/firebase#3.0.5+20160723033700"
+  },
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20161015015725"
+  }
+}

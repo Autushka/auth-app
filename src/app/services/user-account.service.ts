@@ -5,6 +5,7 @@ import {
 } from "angularfire2";
 import anything = jasmine.anything;
 import {GlobalsService} from "./globals.service";
+import * as _ from 'lodash';
 
 let profileDetails: ProfileDetails = {};
 
@@ -13,7 +14,7 @@ export class UserAccountService {
 	isAdmin: boolean;
 
 	profileDetails: any;
-	profileDetailsSnapshot: ProfileDetails;
+	profileDetailsSnapshot: any;
 	isProfileDetailsInitialized: boolean;
 
 	adminCheck: any;
@@ -38,6 +39,7 @@ export class UserAccountService {
 	changeProfileDetailsState(profileDetails: any) {
 		this.profileDetails.next(profileDetails);
 		this.profileDetailsSnapshot = profileDetails;
+		this.profileDetailsSnapshot.fullName = this.profileDetailsSnapshot.firstName + ' ' + this.profileDetailsSnapshot.lastName;
 	}
 
 	changeAdminCheckState(adminCheck: any) {
@@ -56,14 +58,31 @@ export class UserAccountService {
 		return this.auth;
 	}
 
+	getUserRoles() {
+		let roles: any[] = [];
+
+		roles.push({key: '', description: 'Select One'});
+		roles.push({key: 'admin', description: 'Administrator'});
+		roles.push({key: 'projectManager', description: 'Project Manager'});
+		roles.push({key: 'reader', description: 'Project Reader'});
+		roles.push({key: 'writer', description: 'Project Writer'});
+
+		return roles;
+	}
+
+	getRoleDescription(roleKey) {
+		return _.find(this.getUserRoles(), function(role){
+			return role.key === roleKey;
+		}).description;
+	}
+
 	initialize() {
 		this.isAdmin = false;
 		this.profileDetails = new BehaviorSubject(profileDetails);
-		this.profileDetailsSnapshot = {firstName: '', lastName: '', email: '', photoURL: ''};
+		this.profileDetailsSnapshot = {};
 		this.isProfileDetailsInitialized = false;
 		this.profileDetailsAF = null;
 		this.profileDetailsStateChange$ = this.profileDetails.asObservable();
-
 
 		this.adminCheck = new BehaviorSubject({isAdmin: false});
 		this.isAdminCheckInitialized = false;
@@ -88,7 +107,6 @@ export class UserAccountService {
 	initializeProfileDetails(params: FireBaseCallParams) {
 		let that = this;
 		this.profileDetailsAF = this.af.database.object('/users/' + this.auth.uid);
-		this.isProfileDetailsInitialized = true;
 
 		if (params.showBusyIndicator) {
 			this.globalService.changeBusyIndicatorState(true);
@@ -97,7 +115,9 @@ export class UserAccountService {
 		this.profileDetailsAF.first().subscribe(data => {
 			let firstName = '';
 			let lastName = '';
-			let newUserProfile: ProfileDetails = {firstName: '', lastName: '', email: '', photoURL: ''};
+			let newUserProfile: any;
+
+			newUserProfile = {};
 
 			if (!data.$exists()) {
 				switch (that.auth.provider) {
@@ -107,21 +127,41 @@ export class UserAccountService {
 						newUserProfile = {
 							firstName: firstName,
 							lastName: lastName,
-							email: that.auth.auth.providerData[0].email,
+							email: that.globalService.firebaseCodec.encode(that.auth.auth.providerData[0].email),
 							photoURL: that.auth.auth.providerData[0].photoURL
 						};
 						break;
 					}
 				}
+
 				that.profileDetailsAF.set(newUserProfile);
+				//adding email record
+				//that.af.database.object('/users/' + this.auth.uid + '/emails/' + this.globalService.firebaseCodec.encode(that.auth.auth.providerData[0].email)).set({active: true});
+
+				// newUserProfile.emails = [];
+				// newUserProfile.emails.push(that.globalService.firebaseCodec.encode(that.auth.auth.providerData[0].email));
+
+				that.isProfileDetailsInitialized = true;
 				that.changeProfileDetailsState(newUserProfile);
 			} else {
 				newUserProfile.firstName = data.firstName;
 				newUserProfile.lastName = data.lastName;
-				newUserProfile.email = data.email;
+				newUserProfile.email = that.globalService.firebaseCodec.decode(data.email);//TODO: check if decoding is needed
 				newUserProfile.photoURL = data.photoURL;
 
+
+				//newUserProfile.emails = [];
+				//newUserProfile.emails.push(newUserProfile.email);
+				// that.af.database.list('/users/' + that.auth.uid + '/emails').first().subscribe(emails => {
+				// 	that.profileDetailsSnapshot.emails = [];
+				//
+				// 	_.forEach(emails, function(email){
+				// 		newUserProfile.emails.push(that.globalService.firebaseCodec.decode(email));
+				// 	});
+				that.isProfileDetailsInitialized = true;
 				that.changeProfileDetailsState(newUserProfile);
+				//});
+				//newUserProfile.emails.push(that.globalService.firebaseCodec.encode(that.auth.auth.providerData[0].email));
 			}
 
 			if (params.showBusyIndicator) {

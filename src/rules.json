@@ -1,0 +1,140 @@
+{
+  "rules": {
+    "userRoles": {
+      ".validate": "newData.hasChildren(['description']) && newData.child('description').val().length <= 100",
+      "description": {
+        ".validate": "newData.isString()"
+      },
+      "$other": {
+        ".validate": "false"
+      },
+      ".read": "auth != null"
+    },
+    "taskStatuses": {
+      ".validate": "newData.hasChildren(['description']) && newData.child('description').val().length <= 100",
+      "description": {
+        ".validate": "newData.isString()"
+      },
+      "$other": {
+        ".validate": "false"
+      },
+      ".read": "auth != null"
+    },
+    "invitationStatuses": {
+      ".validate": "newData.hasChildren(['description']) && newData.child('description').val().length <= 100",
+      "description": {
+        ".validate": "newData.isString()"
+      },
+      "$other": {
+        ".validate": "false"
+      },
+      ".read": "auth != null"
+    },
+    "admins": {
+      "$adminId": {
+        ".read": "auth != null && auth.uid == $adminId"
+      }
+    },
+    "users": {
+      "$userId": {
+        ".validate": "newData.hasChildren(['firstName', 'lastName', 'email', 'photoURL'])",
+        "firstName": {
+          ".validate": "newData.isString()"
+        },
+        "lastName": {
+          ".validate": "newData.isString()"
+        },
+        "email": {
+          ".validate": "newData.isString()"
+        },
+        "photoURL": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": "false"
+        },
+        ".read": "auth != null && auth.uid == $userId || root.child('admins').child($userId).val() != null",
+        ".write": "auth != null && auth.uid == $userId || newData.parent().parent().child('admins').child($userId).val() != null",
+        "projects": {
+          "$projectId": {
+            ".validate": "newData.parent().parent().parent().parent().child('projects').child($projectId).val() != null",
+            "userRoles": {
+              "$roleId": {
+                ".validate": "newData.parent().parent().parent().parent().parent().parent().child('userRoles').child($roleId).val() != null"
+              }
+            }
+          }
+        }
+      }
+    },
+    "projects": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() != null",
+      "$projectId": {
+        ".validate": "newData.hasChildren(['name', 'createdBy', 'createdAt', 'members'])",
+        "name": {
+          ".validate": "newData.isString()"
+        },
+        "createdBy": {
+          ".validate": "newData.isString() && newData.parent().parent().parent().child('users').child(auth.uid).child('firstName').val() + ' ' + newData.parent().parent().parent().child('users').child(auth.uid).child('lastName').val() == newData.val()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && newData.val() == now"
+        },
+        "members": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": "false"
+        },
+        ".write": "data.val() == null && auth != null || data.val() != null && newData.val() != null && (auth != null && newData.parent().parent().child('admins').child(auth.uid).val() != null || auth != null && newData.parent().parent().child('projects').child($projectId).child('users').child(auth.uid).child('userRoles').child('admin').val() != null || newData.parent().parent().child('invitations').child(newData.parent().parent().child('users').child(auth.uid).child('email').val()).child('projectAssignment').child($projectId).child('invitations').val() != null) || data.val() != null && newData.val() == null && (auth != null && newData.parent().parent().child('admins').child(auth.uid).val() != null || auth != null && newData.parent().parent().child('projects').child($projectId).child('users').child(auth.uid).child('userRoles').child('admin').val() != null)",
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() != null || root.child('users').child(auth.uid).child('projects').child($projectId).val() != null",
+        "users": {
+          "$userId": {
+            ".validate": "newData.parent().parent().parent().parent().child('users').child($userId).val() != null",
+            "userRoles": {
+              "$roleId": {
+                ".validate": "newData.parent().parent().parent().parent().parent().parent().child('userRoles').child($roleId).val() != null"
+              }
+            }
+          }
+        }
+      }
+    },
+    "invitationsToEmail": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() != null",
+      "$email": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() != null || root.child('users').child(auth.uid).child('email').val() == $email",
+        "projectAssignment": {
+          "$projectKey": {
+            "invitations": {
+              "$invitationId": {
+                ".validate": "newData.hasChildren(['projectName', 'status', 'createdBy', 'createdAt']) && newData.parent().parent().parent().parent().parent().parent().child('invitationStatuses').child(newData.child('status').val()).val() != null && newData.parent().parent().parent().parent().parent().parent().child('projects').child($projectKey).val() != null",
+                "projectName": {
+                  ".validate": "newData.isString()"
+                },
+                "status": {
+                  ".validate": "newData.isString()"
+                },
+                "createdBy": {
+                  ".validate": "newData.isString() && newData.parent().parent().parent().parent().parent().parent().parent().child('users').child(auth.uid).child('firstName').val() + ' ' + newData.parent().parent().parent().parent().parent().parent().parent().child('users').child(auth.uid).child('lastName').val() == newData.val()"
+                },
+                "createdAt": {
+                  ".validate": "newData.isNumber() && newData.val() == now"
+                },
+                "$other": {
+                  ".validate": "false"
+                },
+                ".write": "data.val() == null && (auth != null && newData.parent().parent().parent().parent().parent().parent().child('admins').child(auth.uid).val() != null || auth != null && newData.parent().parent().parent().parent().parent().parent().child('projects').child($projectKey).child('users').child(auth.uid).child('userRoles').child('admin').val() != null) || data.val() != null && newData.val() != null && (auth != null && newData.parent().parent().parent().parent().parent().parent().child('admins').child(auth.uid).val() != null || auth != null && newData.parent().parent().parent().parent().parent().parent().child('projects').child($projectKey).child('users').child(auth.uid).child('userRoles').child('admin').val() != null || newData.parent().parent().parent().parent().parent().parent().child('users').child(auth.uid).child('email').val() == $email)",
+                "userRoles": {
+                  "$roleId": {
+                    ".validate": "newData.parent().parent().parent().parent().parent().parent().parent().parent().child('userRoles').child($roleId).val() != null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

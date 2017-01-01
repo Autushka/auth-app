@@ -6,6 +6,7 @@ import anything = jasmine.anything;
 export class GlobalsService {
 	isBusyIndicatorShown: any;
 	busyIndicatorStateChange$: any;
+	firebaseCodec: any;
 
 	constructor() {
 		this.initialize();
@@ -18,6 +19,17 @@ export class GlobalsService {
 	initialize() {
 		this.isBusyIndicatorShown = new BehaviorSubject(false);
 		this.busyIndicatorStateChange$ = this.isBusyIndicatorShown.asObservable();
+		this.firebaseCodec = {
+			encode: function (s) {
+				var value = encodeURIComponent(s).replace(/\./g, '%2E');
+				value = value.replace(/\%/g, '____');
+				return value;
+			},
+			decode: function (s) {
+				var value = s.replace(/____/g, '%');
+				return decodeURIComponent(value);
+			}
+		};
 	}
 
 	generateGuild() {

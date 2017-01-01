@@ -1,0 +1,29 @@
+<form [formGroup]="invitationForm">
+	<div>
+		<label for="sendToEmail">Send To</label>
+		<input type="text"
+				 id="sendToEmail"
+				 name="sendToEmail"
+				 [formControl]="invitationForm.controls['sendToEmail']">
+		<div *ngIf="!invitationForm.controls['sendToEmail'].valid && invitationForm.controls['sendToEmail'].touched">
+			Please provide a valid email.
+		</div>
+	</div>
+
+	<div>
+		<label for="userRole">User Role</label>
+		<select id="userRole" [formControl]="invitationForm.controls['userRole']">
+			<option *ngFor="let userRole of userRoles" [value]="userRole.key">{{userRole.description}}</option>
+		</select>
+		<div *ngIf="!invitationForm.controls['userRole'].valid && invitationForm.controls['userRole'].touched">Please
+			specify the role.
+		</div>
+	</div>
+</form>
+
+<button
+	class="cnp-btn"
+	(click)="onSendInvitation()"
+	style="margin-top: 40px;">Send
+</button>
+

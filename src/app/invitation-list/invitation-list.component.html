@@ -1,0 +1,28 @@
+<p>
+	Invitations List
+</p>
+
+<div *ngFor="let invitation of invitationList; let i = index;">
+	<div class="container" style="margin-bottom: 10px;">
+		<div class="row">
+			<div class="gr-3">
+				<div>{{ invitation.projectName }}</div>
+			</div>
+
+			<div class="gr-3">
+				<div>{{ invitation.createdAt | date:'MM/dd/y'}}</div>
+			</div>
+
+			<div class="gr-2">
+				<div>{{ invitation.createdBy }}</div>
+			</div>
+
+			<div class="gr-2">
+				<button class="float-right" (click)="onAccept(i)">Accept</button>
+			</div>
+			<div class="gr-2">
+				<button class="float-right" (click)="onDecline(i)">Decline</button>
+			</div>
+		</div>
+	</div>
+</div>

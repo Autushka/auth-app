@@ -12,12 +12,12 @@ export class ProjectListComponent implements OnInit {
 	projectList = [];
 	projectEntityService: ProjectEntityService;
 
-	constructor(router: Router, private route: ActivatedRoute, projectEntityService: ProjectEntityService) {
+	constructor(router: Router, projectEntityService: ProjectEntityService) {
 		let that = this;
 		this.router = router;
 		this.projectEntityService = projectEntityService;
 
-		this.projectList = route.snapshot.data['resolvedProjectList'];
+		//this.projectList = route.snapshot.data['resolvedProjectList'];
 
 		projectEntityService.projectListStateChange$.subscribe(
 			projectList => {

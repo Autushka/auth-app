@@ -1,0 +1,18 @@
+<div *ngIf="projectUsers.length">
+	<div>Project Users:</div>
+	<div *ngFor="let user of projectUsers; let i = index;" class="container">
+		<div class="row">
+			<div class="gr-3">
+				<div>{{ user.fullName }}</div>
+			</div>
+
+			<div class="gr-3">
+				<div>{{ user.userRole }}</div>
+			</div>
+
+			<div class="gr-3">
+				<button class="float-right" (click)="onDelete(i)">Delete</button>
+			</div>
+		</div>
+	</div>
+</div>
